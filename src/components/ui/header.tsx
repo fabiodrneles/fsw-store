@@ -13,9 +13,11 @@ import { Button } from "./button";
 import { Card } from "./card";
 import { Sheet, SheetContent, SheetHeader, SheetTrigger } from "./sheet";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@radix-ui/react-separator";
 
 const Header = () => {
-  const { status } = useSession();
+  const { status, data } = useSession();
 
   const handleLoginClick = async () => {
     await signIn();
@@ -23,7 +25,7 @@ const Header = () => {
 
   const handleLogoutClick = async () => {
     await signOut();
-  }
+  };
   return (
     <Card className="flex items-center justify-between p-[1.875rem]">
       <Sheet>
@@ -37,7 +39,28 @@ const Header = () => {
           <SheetHeader className="text-left text-lg font-semibold">
             Menu
           </SheetHeader>
-          <div className="mt-2 flex flex-col gap-2">
+
+          {status === "authenticated" && data?.user && (
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2 py-4">
+                <Avatar>
+                  <AvatarFallback>
+                    {data.user.name?.[0].toUpperCase()}
+                  </AvatarFallback>
+
+                  {data.user.image && <AvatarImage src={data.user.image} />}
+                </Avatar>
+                <div className="flex flex-col">
+                  <p className="font-medium">{data.user.name}</p>
+                  <p className="text-sm opacity-75">Boas Compras!</p>
+                </div>
+              </div>
+
+              <Separator />
+            </div>
+          )}
+
+          <div className="mt-4 flex flex-col gap-2">
             {status === "unauthenticated" && (
               <Button
                 onClick={handleLoginClick}
@@ -53,7 +76,8 @@ const Header = () => {
               <Button
                 onClick={handleLogoutClick}
                 variant="outline"
-                className="w-full justify-start gap-2">
+                className="w-full justify-start gap-2"
+              >
                 <LogOutIcon size={16} />
                 Fazer Logout
               </Button>
